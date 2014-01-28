@@ -6,15 +6,16 @@
 
 #define BER_ERR_SUCCESS       0
 #define BER_ERR_END_OF_BUFFER 1
+#define BER_ERR_BAD_FORMAT   2
 
 typedef struct {
 uint8_t* current;
 const uint8_t* end;
 } ber_buffer;
 
-inline uint8_t ber_decode_type (const ber_buffer* buffer);
-inline uint8_t ber_decode_length (const ber_buffer* buffer);
-void ber_decode_init(ber_buffer* buffer, byte* data, const int size);
+uint8_t ber_decode_type (const ber_buffer* buffer);
+uint8_t ber_decode_length (const ber_buffer* buffer);
+int ber_decode_init(ber_buffer* buffer, byte* data, const int size);
 void ber_decode_buffer_next (ber_buffer* buffer);
 int ber_decode_int (ber_buffer* buffer, int* value);
 int ber_bytes2int (const byte* data, size_t size);

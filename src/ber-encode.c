@@ -64,6 +64,6 @@ size_t ber_encode_null(byte* data) {
 
 size_t ber_encode_sequence(byte* data, uint8_t type, size_t size) {
   data[0] = type;
-  return 1 + ber_encode_length(data + 1, size) + size;
+  return 1 + ber_encode_length(data + 1, size);
 }
 

@@ -17,15 +17,18 @@ size_t snmp_decode(byte* data, int size,
   var_bind varbindlist[SNMP_MAX_VARS];
   size_t varbindlist_len;
 
-  ber_decode_init(&packet, data, size);
+  if (ber_decode_init(&packet, data, size) != BER_ERR_SUCCESS)
+    return 0;
   
   // version
   ber_decode_int(&packet, &version);
 
   // community
-  ber_decode_octet_str(&packet, snmp.community, SNMP_COMMUNITY_MAXLEN);
-  if (strcmp(community, snmp.community) != 0)
+  if (ber_decode_octet_str(&packet, snmp.community,
+                           SNMP_COMMUNITY_MAXLEN) != BER_ERR_SUCCESS
+      || strcmp(community, snmp.community) != 0) {
     return 0;
+  }
 
   snmp.pdu_type = ber_decode_type(&packet);
   ber_decode_sequence(&packet, &pdu);
@@ -69,7 +72,7 @@ size_t snmp_decode_pdu(ber_buffer* pdu, snmp_packet* packet,
 
   ber_decode_sequence(pdu, &varbindings);
   
-  while (ber_decode_sequence(&varbindings, &object)) {
+  while (ber_decode_sequence(&varbindings, &object) == BER_ERR_SUCCESS) {
     if (i == varbindlist_len) {
       return i + 1;
     }
@@ -174,7 +177,6 @@ size_t snmp_encode_getResponse(uint8_t* response, size_t buffer_size,
     varbind_len[i] = ber_encode_calcHeadLen(bindings[i].id.len);
     varbind_len[i] += bindings[i].id.len;
 
-    varbind_len[i] += ber_encode_calcHeadLen(bindings[i].size);
     varbind_len[i] += bindings[i].size;
 
     varbindlist_len += ber_encode_calcHeadLen(varbind_len[i]);
@@ -182,10 +184,11 @@ size_t snmp_encode_getResponse(uint8_t* response, size_t buffer_size,
   }
   
   pdu_len = ber_encode_calcHeadLen(varbindlist_len);
-  pdu_len += 2 + ber_encode_integer_size(request->request_id) + varbindlist_len;
+  pdu_len += 2 + ber_encode_integer_size(request->request_id) +
+    6 + varbindlist_len;
   
   response_len = ber_encode_calcHeadLen(pdu_len);
-  response_len += 1 + strlen(request->community) + pdu_len;
+  response_len += 5 + strlen(request->community) + pdu_len;
 
   // Encode the data
   response += ber_encode_sequence(response, BER_SEQUENCE, response_len);
@@ -203,9 +206,8 @@ size_t snmp_encode_getResponse(uint8_t* response, size_t buffer_size,
     response += ber_encode_sequence(response, BER_SEQUENCE, varbind_len[i]);
     
     response += ber_encode_object(response, &bindings[i].id);
-    response += ber_encode_octets(response, bindings[i].type,
-                                  bindings[i].data,
-                                  bindings[i].size);
+    memcpy(response, bindings[i].data, bindings[i].size);
+    response += bindings[i].size;
   }
 
   return ber_encode_calcHeadLen(response_len) + response_len;
