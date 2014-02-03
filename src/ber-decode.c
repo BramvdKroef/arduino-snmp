@@ -26,7 +26,7 @@ void ber_decode_buffer_next (ber_buffer* buffer) {
   buffer->current += 2 + ber_decode_length(buffer);
 }
 
-int ber_decode_int (ber_buffer* buffer, int* value) {
+int ber_decode_int (ber_buffer* buffer, int32_t* value) {
   if (buffer->current >= buffer->end)
     return BER_ERR_END_OF_BUFFER;
    
@@ -37,8 +37,8 @@ int ber_decode_int (ber_buffer* buffer, int* value) {
   return BER_ERR_SUCCESS;
 }
 
-int ber_bytes2int (const byte* data, size_t size) {
-  int value = 0, i;
+int32_t ber_bytes2int (const byte* data, size_t size) {
+  int32_t value = 0, i;
   
   for (i = 0; i < size; i++) {
     value <<= 8;

@@ -12,7 +12,7 @@ size_t snmp_decode(byte* data, int size,
                    var_bind* values, size_t values_len,
                    const char* community) {
   ber_buffer packet, pdu;
-  int version;
+  int32_t version;
   snmp_packet snmp;
   var_bind varbindlist[SNMP_MAX_VARS];
   size_t varbindlist_len;

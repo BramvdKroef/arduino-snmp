@@ -47,9 +47,9 @@ typedef struct {
 typedef struct {
   uint8_t pdu_type;
   char community[SNMP_COMMUNITY_MAXLEN];
-  int request_id;
-  int error_status;
-  int error_index;
+  int32_t request_id;
+  int32_t error_status;
+  int32_t error_index;
 } snmp_packet;
 
 #define SNMP_VERSION 0
