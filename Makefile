@@ -50,6 +50,7 @@ OBJCOPY = avr-objcopy
 STRIP   = avr-strip
 AVRDUDE = avrdude
 SIZE	= avr-size
+AR      = avr-ar
 
 #########################################
 # Hardware variables
@@ -70,7 +71,7 @@ ARDUINO_VARIANT_INC = $(ARDUINO_PATH)/hardware/arduino/variants/$(VARIANT)
 CFLAGS_HW := -mmcu=$(MCU) -DF_CPU=$(F_CPU)
 
 # Avrdude hardware flags
-AVRDUDE.CONF = $(ARDUINO_PATH)/hardware/tools/avrdude.conf
+AVRDUDE.CONF = /etc/avrdude.conf #$(ARDUINO_PATH)/hardware/tools/avrdude.conf
 AVRDUDE_HW := -p$(MCU) -c$(AVRDUDE_PROTOCOL) -P$(SERIAL_PORT)
 
 #########################################
@@ -107,14 +108,15 @@ CFLAGS   := $(COMPILER_FLAGS) $(CFLAGS_HW) $(INC_DIRS)
 CXXFLAGS := $(COMPILER_FLAGS) $(CFLAGS_HW) $(INC_DIRS)
 LDFLAGS  := $(CFLAGS_HW) -Wall -Os 
 
-LIBARDUINO_DIR=libarduino
-LIBARDUINO=$(LIBARDUINO_DIR)/libarduino.a
+# LIBARDUINO_DIR=libarduino
+LIBARDUINO=libarduino.a
 export ARDUINO_INC
 export INC_DIRS
 export CFLAGS
 export CXXFLAGS
 
 BINARY = binary
+LIBRARY = lib$(notdir $(CURDIR)).a
 
 ########################################
 # Rules
@@ -123,8 +125,11 @@ BINARY = binary
 .PHONY: all
 all: requirements info $(BINARY).hex
 
-$(LIBARDUINO):
-	$(MAKE) -C $(LIBARDUINO_DIR)
+#$(LIBARDUINO):
+#	$(MAKE) -C $(LIBARDUINO_DIR)
+
+.PHONY: library
+library: $(LIBRARY)
 
 # List boards
 .PHONY: boards
@@ -165,6 +170,9 @@ $(BINARY).hex: $(BINARY).elf
 $(BINARY).elf: $(BUILD_DIR) $(LIBARDUINO) $(OBJ)
 	$(CXX) $(LDFLAGS) $(OBJ) -o $(BINARY).elf \
 	-L$(LIBARDUINO_DIR) -larduino
+
+$(LIBRARY): $(BUILD_DIR) $(OBJ)
+	$(AR) rcs $(LIBRARY) $(OBJ)
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
