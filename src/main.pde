@@ -3,10 +3,9 @@ extern "C" {
 #include "snmp.h"
 }
 
-#define SNMP_VALUES_LENGTH 3
 #define SNMP_COMMUNITY "public"
 
-var_bind snmp_values[SNMP_VALUES_LENGTH];
+var_bind snmp_values[3];
 
 
 uint8_t sysDescr_oid[]    = {SNMP_OID_SYSTEM, 1, 0};
@@ -74,7 +73,8 @@ void setup () {
                     (uint8_t*)&uptime);
 
 
-  len = snmp_decode(test_packet, sizeof(test_packet), snmp_values, 1, SNMP_COMMUNITY);
+  len = snmp_decode(test_packet, sizeof(test_packet),
+                    snmp_values, sizeof(snmp_values), SNMP_COMMUNITY);
 
   Serial.begin(9600);
 
