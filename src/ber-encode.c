@@ -9,7 +9,7 @@ size_t ber_encode_length(byte* data, size_t length) {
   return 1;
 }
 
-size_t ber_encode_integer(byte* data, uint8_t type, int value) {
+size_t ber_encode_integer(byte* data, uint8_t type, int32_t value) {
   size_t len, offset;
   int i;
 
@@ -28,9 +28,10 @@ size_t ber_encode_integer(byte* data, uint8_t type, int value) {
   return offset + len;
 }
 
-size_t ber_encode_integer_size(int value) {
+size_t ber_encode_integer_size(int32_t value) {
   size_t len = 1;
-  int tmp = value >> 8;
+  int32_t tmp = value;
+  tmp = tmp >> 8;
   // how many bytes are used in value
   while (tmp != 0) {
     len++;
@@ -64,6 +65,6 @@ size_t ber_encode_null(byte* data) {
 
 size_t ber_encode_sequence(byte* data, uint8_t type, size_t size) {
   data[0] = type;
-  return 1 + ber_encode_length(data + 1, size) + size;
+  return 1 + ber_encode_length(data + 1, size);
 }
 

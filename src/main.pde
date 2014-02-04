@@ -20,6 +20,20 @@ uint8_t sysUpTime_value[6];
 
 const uint8_t vendorOid[] = {SNMP_OID_ENTERPRISE, 9999};
 
+size_t snmp_debug(byte* data, int size,
+                  var_bind* values, size_t values_len,
+                  const char* community);
+
+void hexDump(uint8_t* data, size_t size) {
+  size_t i;
+  for (i = 0; i < size; i++) {
+    if (data[i] < 0x10)
+      Serial.print("0");
+    Serial.print(data[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println("");
+}
 uint8_t test_packet[44] =
   {0x30, 0x29, // sequence
    0x02, 0x01, 0x00, // version
@@ -33,7 +47,7 @@ uint8_t test_packet[44] =
    0x06, 0x09, SNMP_OID_SYSTEM, 0x01, 0x00, //oid
    0x05, 0x00 // null
   } ;
-   
+
 void setup () {
   const char* sysDescr = 'test';
   oid sysOid;
@@ -62,14 +76,10 @@ void setup () {
 
   len = snmp_decode(test_packet, 44, snmp_values, 1, SNMP_COMMUNITY);
   Serial.begin(9600);
+
+  len = snmp_debug(test_packet, 44, snmp_values, 1, SNMP_COMMUNITY);
   Serial.println(len);
-  for (i = 0; i < len; i++) {
-    if (test_packet[i] < 0x10)
-      Serial.print("0");
-    Serial.print(test_packet[i], HEX);
-    Serial.print(" ");
-  }
-  Serial.println("");
+  hexDump(test_packet, len);
 }
 
 void loop () {

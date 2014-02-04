@@ -1,31 +1,32 @@
 #include "ber-decode.h"
 
 
-inline uint8_t ber_decode_type (const ber_buffer* buffer) {
+uint8_t ber_decode_type (const ber_buffer* buffer) {
   return buffer->current[0];
 }
 
-inline uint8_t ber_decode_length (const ber_buffer* buffer) {
+uint8_t ber_decode_length (const ber_buffer* buffer) {
   return buffer->current[1];
 }
 
-void ber_decode_init(ber_buffer* buffer, byte* data, const int size) {
+int ber_decode_init(ber_buffer* buffer, byte* data, const int size) {
   buffer->current = data;
 
   if (ber_decode_type(buffer) != BER_SEQUENCE)
-    return;
+    return BER_ERR_BAD_FORMAT;
   if (ber_decode_length(buffer) > size - 2)
-    return;
+    return BER_ERR_END_OF_BUFFER;
 
   buffer->end = data + 2 + ber_decode_length(buffer);
   buffer->current += 2;
+  return BER_ERR_SUCCESS;
 }
 
 void ber_decode_buffer_next (ber_buffer* buffer) {
   buffer->current += 2 + ber_decode_length(buffer);
 }
 
-int ber_decode_int (ber_buffer* buffer, int* value) {
+int ber_decode_int (ber_buffer* buffer, int32_t* value) {
   if (buffer->current >= buffer->end)
     return BER_ERR_END_OF_BUFFER;
    
@@ -36,12 +37,12 @@ int ber_decode_int (ber_buffer* buffer, int* value) {
   return BER_ERR_SUCCESS;
 }
 
-int ber_bytes2int (const byte* data, size_t size) {
-  int value = 0, i;
+int32_t ber_bytes2int (const byte* data, size_t size) {
+  int32_t value = 0, i;
   
   for (i = 0; i < size; i++) {
     value <<= 8;
-    value &= data[i];
+    value |= data[i];
   }
   return value;
 }
@@ -64,7 +65,7 @@ int ber_decode_octet_str (ber_buffer* buffer, char* str, size_t maxlen) {
   if (len > maxlen - 1)
     len = maxlen - 1;
 
-  memcpy(buffer->current + 2, str, len);
+  memcpy(str, buffer->current + 2, len);
   str[len] = '\0';
   
   ber_decode_buffer_next(buffer);

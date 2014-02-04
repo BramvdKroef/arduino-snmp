@@ -6,8 +6,8 @@
 
 size_t ber_encode_calcHeadLen(size_t data_length);
 size_t ber_encode_length(byte* data, size_t length);
-size_t ber_encode_integer(byte* data, uint8_t type, int value);
-size_t ber_encode_integer_size(int value);
+size_t ber_encode_integer(byte* data, uint8_t type, int32_t value);
+size_t ber_encode_integer_size(int32_t value);
 size_t ber_encode_octets(uint8_t* data, uint8_t type, uint8_t* value,
                          size_t len);
 size_t ber_encode_str(uint8_t* data, uint8_t type, const char* value);
