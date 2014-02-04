@@ -62,13 +62,15 @@ typedef struct {
 
 #define SNMP_VERSION 0
 
+void snmp_init_varbind(var_bind* var, uint8_t* oid, const size_t oidlen,
+                       const uint8_t type, uint8_t* data, const uint8_t* value);
 int snmp_oid_cmp(oid* oid1, oid* oid2);
 size_t snmp_decode(byte* data, int size,
                    var_bind* values, size_t values_len,
                    const char* community);
 size_t snmp_decode_pdu(ber_buffer* pdu, snmp_packet* packet,
                        var_bind* varbindlist, size_t varbindlist_len);
-size_t snmp_encode_var(var_bind* var, uint8_t* data);
+size_t snmp_encode_var(var_bind* var, const uint8_t* data);
 void snmp_decode_getRequest(snmp_packet* request,
                             var_bind* r_vals, size_t r_vals_len,
                             var_bind* values, size_t values_len);

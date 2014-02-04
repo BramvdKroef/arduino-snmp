@@ -1,6 +1,16 @@
 #include "snmp.h"
 
 
+void snmp_init_varbind(var_bind* var, uint8_t* oid, const size_t oidlen,
+                       const uint8_t type, uint8_t* data,
+                       const uint8_t* value) {
+  var->id.data = oid;
+  var->id.len = oidlen;
+  var->type = type;
+  var->data = data;
+  snmp_encode_var(var, value);
+}
+
 int snmp_oid_cmp(oid* oid1, oid* oid2) {
   if (oid1->len != oid2->len)
     return oid1->len - oid2->len;
@@ -90,7 +100,7 @@ size_t snmp_decode_pdu(ber_buffer* pdu, snmp_packet* packet,
   return i;
 }
 
-size_t snmp_encode_var(var_bind* var, uint8_t* data) {
+size_t snmp_encode_var(var_bind* var, const uint8_t* data) {
   
   switch(var->type) {
   case BER_INTEGER:
@@ -98,7 +108,7 @@ size_t snmp_encode_var(var_bind* var, uint8_t* data) {
   case SNMP_GAUGE:
   case SNMP_TIME_TICKS:
   case SNMP_IP_ADDR:
-    var->size = ber_encode_integer(var->data, var->type, *(int*)data);
+    var->size = ber_encode_integer(var->data, var->type, *(uint32_t*)data);
     break;
 
   case BER_OCTET_STR:

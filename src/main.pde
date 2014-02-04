@@ -18,7 +18,7 @@ uint8_t sysObjectID_value[8];
 uint8_t sysUpTime_oid[]   = {SNMP_OID_SYSTEM, 3, 0};
 uint8_t sysUpTime_value[6];
 
-const uint8_t vendorOid[] = {SNMP_OID_ENTERPRISE, 9999};
+uint8_t vendorOid[] = {SNMP_OID_ENTERPRISE, 99};
 
 size_t snmp_debug(byte* data, int size,
                   var_bind* values, size_t values_len,
@@ -34,7 +34,7 @@ void hexDump(uint8_t* data, size_t size) {
   }
   Serial.println("");
 }
-uint8_t test_packet[44] =
+uint8_t test_packet[] =
   {0x30, 0x29, // sequence
    0x02, 0x01, 0x00, // version
    0x04, 0x06, 'p', 'u', 'b', 'l', 'i', 'c', // community
@@ -49,11 +49,11 @@ uint8_t test_packet[44] =
   } ;
 
 void setup () {
-  const char* sysDescr = 'test';
+  const char* sysDescr = "test";
   oid sysOid;
   uint32_t uptime = 0;
   
-  size_t len, i;
+  size_t len;
 
   snmp_init_varbind(&snmp_values[0],
                     sysDescr_oid, sizeof(sysDescr_oid),
@@ -74,22 +74,19 @@ void setup () {
                     (uint8_t*)&uptime);
 
 
-  len = snmp_decode(test_packet, 44, snmp_values, 1, SNMP_COMMUNITY);
+  len = snmp_decode(test_packet, sizeof(test_packet), snmp_values, 1, SNMP_COMMUNITY);
+
   Serial.begin(9600);
 
-  len = snmp_debug(test_packet, 44, snmp_values, 1, SNMP_COMMUNITY);
   Serial.println(len);
   hexDump(test_packet, len);
 }
 
 void loop () {
+  uint32_t uptime;
+  
+  delay(100);
+  uptime = millis() / 10;
+  snmp_encode_var(&snmp_values[2], (uint8_t*)&uptime);
 }
 
-void snmp_init_varbind(var_bind* var, uint8_t* oid, size_t oidlen,
-                       uint8_t type, uint8_t* data, uint8_t* value) {
-  var->id.data = oid;
-  var->id.len = oidlen;
-  var->type = type;
-  var->data = data;
-  snmp_encode_var(var, value);
-}
