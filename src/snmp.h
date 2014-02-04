@@ -32,6 +32,14 @@
 #define SNMP_ERROR_READONLY   4
 #define SNMP_ERROR_GENERR     5
 
+//                          iso   org(3) dod(6) 1
+#define SNMP_OID_INTERNET   (40 + 3),    6,     1          
+#define SNMP_OID_MGMT        SNMP_OID_INTERNET, 2
+#define SNMP_OID_MIB          SNMP_OID_MGMT, 1
+#define SNMP_OID_SYSTEM        SNMP_OID_MIB, 1
+#define SNMP_OID_PRIVATE     SNMP_OID_INTERNET, 4
+#define SNMP_OID_ENTERPRISE   SNMP_OID_PRIVATE, 1
+
 
 // Max number of value bindings in a snmp packet
 #define SNMP_MAX_VARS 5
